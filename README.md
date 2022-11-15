@@ -1,10 +1,13 @@
-# Asynchronous Python wrapper for ![agify](https://agify.io/)'s name APIs (Genderize, Nationalize, Agify)
+# Asynchronous Python wrapper for (![Genderize](https://genderize.io/), ![Nationalize](https://nationalize.io/), ![Agify](https://agify.io/))
+A simple API for predicting the age, gender, and country of a person by their name.
 
-## Example:
+The API is free for up to 1000 names/day. No sign up or API key needed. So go ahead and try it out.
+## Usage example:
 ```python
 from agify import NameAPI
-g = NameAPI({"Igor", "Alex", }, mode="*")
+g = NameAPI(["Igor", "Alex"], mode="*")
 print(asyncio.run(g.get_names_info()))
+# ->
 {'Alex': {'age': 45,
           'count': 1114390,
           'country': [{'country_id': 'CZ', 'probability': 0.082},
@@ -24,3 +27,17 @@ print(asyncio.run(g.get_names_info()))
           'gender': 'male',
           'probability': 1.0}}
 ```
+```python
+a = NameAPI(["Ivan"], "gender")
+print(asyncio.run(a.get_names_info()))
+# ->
+{'Ivan': {'count': 425630, 'gender': 'male', 'probability': 1.0}}
+```
+```python
+a = NameAPI()
+print(asyncio.run(a.get_limit_remaining()))
+# ->
+987
+```
+---
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
