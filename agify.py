@@ -1,16 +1,22 @@
 import asyncio
 import httpx
 from typing import List, Dict, Union, Iterable
+from typing import Literal
+from copy import copy
 
-class GetAgeByName():
+class NameAPI():
 	MAX_PER_REQUEST = 9
-	URL = "https://api.agify.io/?"
+	AGIFY_URL = "https://api.agify.io/?"
+	NATIONALIZE_URL = "https://api.nationalize.io?"
+	GENDERIZE_URL = "https://api.genderize.io?"
+
 	def __init__(self, names: Union[Iterable[str], str],
+					mode: Literal["age", "nation", "gender", "*"] = "*",
 					api_key: str = None,
 					country_id: str = None,
 					ignore_errors: bool = False) -> None:
 		'''Predict current age by name.
-			Python wrapper for https://agify.io/
+			Python wrapper for https://agify.io/ https://genderize.io/ https://nationalize.io/
 		The API follows ISO 3166-1 alpha-2 for country codes.
 			List https://agify.io/our-data of supported countries.
 		'''
@@ -18,6 +24,16 @@ class GetAgeByName():
 			self.names = [names]
 		else:
 			self.names = list(names)
+
+		if mode == "*":
+			self.URL = [self.AGIFY_URL, self.NATIONALIZE_URL, self.GENDERIZE_URL]
+		elif mode == "age":
+			self.URL = [self.AGIFY_URL]
+		elif mode == "nation":
+			self.URL = [self.NATIONALIZE_URL]
+		elif mode == "gender":
+			self.URL = [self.GENDERIZE_URL]
+
 		self.api_key = f"&apikey={api_key}" if api_key != None else ""
 		self.country_id = f"&country_id={country_id}" if api_key != None else ""
 		self.ignore_errors = bool(ignore_errors)
@@ -41,7 +57,10 @@ class GetAgeByName():
 				for d in response.json():
 					d_name = d["name"]
 					del d["name"]
-					dict_[d_name] = d
+					try:
+						dict_[d_name] = dict_[d_name] | d
+					except KeyError:
+						dict_[d_name] = d
 
 		elif self.ignore_errors is True:
 			for response in responses:
@@ -49,7 +68,10 @@ class GetAgeByName():
 					try:
 						d_name = d["name"]
 						del d["name"]
-						dict_[d_name] = d
+						try:
+							dict_[d_name] = dict_[d_name] | d
+						except KeyError:
+							dict_[d_name] = d
 					except TypeError:
 						pass
 		return dict_
@@ -63,13 +85,14 @@ class GetAgeByName():
 	def __gen_urls(self):
 		'''Generates url requests with MAX_PER_REQUEST names'''
 		url_lists = list()
-		while self.names != []:
-			url = self.URL
-			for name in range(self.MAX_PER_REQUEST):
-				try:
-					url += f"&name[]={self.names.pop(0)}"
-				except IndexError:
-					break
-			url += self.api_key + self.country_id
-			url_lists.append(url)
+		for url in self.URL:
+			names = copy(self.names)
+			while names != []:
+				for name in range(self.MAX_PER_REQUEST):
+					try:
+						url += f"&name[]={names.pop(0)}"
+					except IndexError:
+						break
+				url += self.api_key + self.country_id
+				url_lists.append(url)
 		return url_lists
