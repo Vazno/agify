@@ -83,7 +83,7 @@ class NameAPI():
 				raise ValueError(response.json()["error"])
 
 	def __gen_urls(self):
-		'''Generates url requests with MAX_PER_REQUEST names'''
+		'''Generates urls with MAX_PER_REQUEST names in single url'''
 		url_lists = list()
 		for url in self.URL:
 			names = copy(self.names)
