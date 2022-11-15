@@ -1,6 +1,6 @@
-# Asynchronous Python wrapper for `https://agify.io/`'s API
+# Asynchronous Python wrapper for ![agify](https://agify.io/)'s API
 
-## Example:
+## Usage example:
 ```python
 import asyncio
 from agify import GetAgeByName
