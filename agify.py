@@ -10,13 +10,13 @@ class NameAPI():
 	NATIONALIZE_URL = "https://api.nationalize.io?"
 	GENDERIZE_URL = "https://api.genderize.io?"
 
-	def __init__(self, names: Union[Iterable[str], str],
+	def __init__(self, names: Union[Iterable[str], str] = [],
 					mode: Literal["age", "nation", "gender", "*"] = "*",
 					api_key: str = None,
 					country_id: str = None,
 					ignore_errors: bool = False) -> None:
 		'''Predict current age by name.
-			Python wrapper for https://agify.io/ https://genderize.io/ https://nationalize.io/
+			An asynchronous Python wrapper for https://agify.io/ https://genderize.io/ https://nationalize.io/
 		The API follows ISO 3166-1 alpha-2 for country codes.
 			List https://agify.io/our-data of supported countries.
 		'''
@@ -47,7 +47,9 @@ class NameAPI():
 		return t
 
 	async def get_names_info(self) -> Dict:
-		'''Returns dictionary {'name': {}}'''
+		'''Returns dictionary with info about names'''
+		if self.names == []:
+			raise ValueError("Please provide names to check, names parameter is empty.")
 		dict_ = dict()
 		responses = await self.__send_requests()
 
@@ -61,8 +63,7 @@ class NameAPI():
 						dict_[d_name] = dict_[d_name] | d
 					except KeyError:
 						dict_[d_name] = d
-
-		elif self.ignore_errors is True:
+		else:
 			for response in responses:
 				for d in response.json():
 					try:
@@ -75,6 +76,38 @@ class NameAPI():
 					except TypeError:
 						pass
 		return dict_
+
+	async def get_headers(self) -> httpx.Headers:
+		'''Returns response's headers
+			
+			Each call decreases amount of total available calls by 1'''
+		async with httpx.AsyncClient() as client:
+			response = await client.get(f"{self.URL[0]}&name=Test")
+		return response.headers
+
+	async def get_limit_reset(self) -> int:
+		'''Seconds remaining until a new time window opens
+			
+			Each call decreases amount of total available calls by 1'''
+		async with httpx.AsyncClient() as client:
+			response = await client.get(f"{self.URL[0]}&name=Test")
+		return int(response.headers["x-rate-limit-reset"])
+
+	async def get_limit(self) -> int:
+		'''The amount of names available in the current time window
+			
+			Each call decreases amount of total available calls by 1'''
+		async with httpx.AsyncClient() as client:
+			response = await client.get(f"{self.URL[0]}&name=Test")
+		return int(response.headers["x-rate-limit-limit"])
+
+	async def get_limit_remaining(self) -> int:
+		'''The number of names left in the current time window
+			
+			Each call decreases amount of total available calls by 1'''
+		async with httpx.AsyncClient() as client:
+			response = await client.get(f"{self.URL[0]}&name=Test")
+		return int(response.headers["x-rate-limit-remaining"])
 
 	def __check_errors(self, responses: List[httpx.Response]) -> None:
 		'''Checks if there are any errors in request.'''
