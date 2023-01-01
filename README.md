@@ -2,6 +2,10 @@
 A simple API for predicting the age, gender, and country of a person by their name.
 
 The API is free for up to 1000 names/day. No sign up or API key needed. So go ahead and try it out.
+
+# Instalation
+`pip install agify`
+
 ## Usage example:
 ### async version:
 ```python
