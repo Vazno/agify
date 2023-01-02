@@ -26,6 +26,8 @@ class NameAPI():
 		'''
 		self.client = httpx.Client()
 
+		self.names = names
+
 		if mode == "*":
 			self.URL = [self.AGIFY_URL, self.NATIONALIZE_URL, self.GENDERIZE_URL]
 		elif mode == "age":
@@ -202,3 +204,4 @@ class AsyncNameAPI(NameAPI):
 			Each call decreases amount of total available calls by 1'''
 		response = await self.client.get(f"{self.URL[0]}&name=Test")
 		return int(response.headers[self.X_RATE_LIMIT_REMAINING])
+
