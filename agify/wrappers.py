@@ -59,6 +59,9 @@ class NameAPI():
 			self.names = names
 			responses = self.__send_requests()
 			return super()._merge_dicts(responses)
+		elif names == None and self.names != None:
+			responses = self.__send_requests()
+			return super()._merge_dicts(responses)
 		else:
 			raise ValueError("Please provide names to check, names parameter is empty.")
 
@@ -172,6 +175,9 @@ class AsyncNameAPI(NameAPI):
 		'''Returns dictionary with info about names'''
 		if names != None:
 			self.names = names
+			responses = await self.__send_requests()
+			return super()._merge_dicts(responses)
+		elif names == None and self.names != None:
 			responses = await self.__send_requests()
 			return super()._merge_dicts(responses)
 		else:
